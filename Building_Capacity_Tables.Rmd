@@ -1,0 +1,161 @@
+---
+title: "Building Capacity - Tables"
+author: "Tristan_Paulino"
+date: "2023-08-23"
+output: html_document
+---
+
+This code is used for the generation of the tables listed in the paper: 
+"Building capacity to conduct genetic epidemiology research on hyperuricemia and gout in an Indigenous community in Guam"
+Paulino et al. 2023
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+library(flextable)
+
+# Import the csv dataset
+
+guam_data_one <- read.csv("guam_final_dataset_1.csv")
+
+```
+
+## Code to generate Table 1.0 Demographic characteristics of the study sample
+
+```{r}
+table_1 <- guam_data_one %>% 
+  select(age_by_group, 
+         gender,
+         ethnicity_by_group,
+         edu_by_group,
+         employment_all_final) %>% 
+  tbl_summary(missing = "no",
+              label = list(age_by_group ~ "Age (years)",
+                           gender ~ "Gender",
+                           ethnicity_by_group ~ "Ethnicity",
+                           edu_by_group ~ "Education",
+                           employment_all_final ~ "Employment"),
+              digits = list(age_by_group = c(0,1),
+                            gender = c(0,1),
+                            ethnicity_by_group = c(0,1),
+                            edu_by_group = c(0,1),
+                            employment_all_final = c(0,1))) %>% 
+  as_flex_table() %>% 
+  flextable::set_caption(caption="Table 1.0: Demographic characteristics of the study sample")
+
+table_1
+```
+
+## Code to generate Table 2.0 Metabolic conditions
+
+```{r}
+table_2 <- guam_data_one %>% 
+  select(ethnicity_by_group,
+         heart_disease_have,
+         diabetes_have,
+         gout_have,
+         high_blood_have,
+         kidney_disease_have,
+         liver_disease,
+         obesity_status,
+         hyperuricemia) %>% 
+  tbl_summary(missing = "no",
+              by = "ethnicity_by_group",
+              label = list(heart_disease_have ~ "Cardiovascular Disease",
+                           diabetes_have ~ "Diabetes",
+                           gout_have ~ "Gout",
+                           high_blood_have ~ "Hypertension",
+                           kidney_disease_have ~ "Chronic Kidney Disease",
+                           liver_disease ~ "Liver Disease",
+                           obesity_status ~ "Obesity",
+                           hyperuricemia ~ "Hyperuricemia"),
+              digits = list(heart_disease_have = c(0,1),
+                           diabetes_have = c(0,1),
+                           gout_have = c(0,1),
+                           high_blood_have = c(0,1),
+                           kidney_disease_have = c(0,1),
+                           liver_disease = c(0,1),
+                           obesity_status = c(0,1),
+                           hyperuricemia = c(0,1))) %>% 
+  add_ci() %>% 
+  add_p(pvalue_fun = ~ style_pvalue(.x, digits = 3)) %>%
+  add_overall() %>%
+  as_flex_table() %>% 
+  flextable::set_caption(caption="Table 2.0: Metabolic diseases and conditions of the study population") 
+
+
+table_2
+
+```
+
+## Code to generate Table 3.0 Behavioural Factors
+```{r}
+tabl_3 <- guam_data_two %>% 
+  select(ethnicity_by_group,
+         alcohol_use,
+         betel_nut_use,
+         chamoru_medicine,
+         exercise,
+         drink,
+         fruit,
+         sea_food,
+         smoke) %>% 
+  tbl_summary(missing = "no",
+              by = "ethnicity_by_group",
+              label = list(alcohol_use ~ "Alcohol Consumption",
+                           betel_nut_use ~ "Betel Nut Use",
+                           chamoru_medicine ~ "Traditional Medicine (Amot) ",
+                           exercise ~ "Exercise",
+                           drink ~ "Sugar-Sweetened Beverage Use",
+                           fruit ~ "Fruit Consumption",
+                           sea_food ~ "Sea Food Consumption",
+                           smoke ~ "Smoking"),
+              digits = list(alcohol_use = c(0,1),
+                           betel_nut_use = c(0,1),
+                           chamoru_medicine = c(0,1),
+                           exercise = c(0,1),
+                           drink = c(0,1),
+                           fruit = c(0,1),
+                           sea_food = c(0,1),
+                           smoke = c(0,1))) %>% 
+  add_ci() %>% 
+  add_p(pvalue_fun = ~ style_pvalue(.x, digits = 3)) %>%
+  add_overall() %>%
+  as_flex_table() %>% 
+  flextable::set_caption(caption="Table 3.0: Behavioral characteristics of the population") 
+
+
+table_3
+
+```
+
+## Code to generate Table 4.0 Serum urate by sex and ethnicity
+
+
+
+```{r}
+
+table_4 <- guam_data_one %>% 
+  select(gender, uric, ethnicity_by_group) %>% 
+  tbl_continuous(
+    variable = "uric",
+    by = "gender",
+    statistic = list(uric ~ "{mean}")
+  ) %>% 
+  add_p() %>% 
+  add_overall(statistic = list(uric ~ "{mean}")) %>% 
+  as_flex_table() %>% 
+  flextable::set_caption(caption="Table 5.0: Serum urate by sex and ethnicity") 
+
+
+table_4
+
+
+
+```
+
+Note: Based on the gtsummary package, table_4 code automatically runs a Two-Way ANOVA. 
+Please verify if your data meets the assumptions of ANOVA. 
+In this scenario, we did not meet assumptions and ran a Kruskal Wallis Test. 
+After Kruskal Wallis calculations: pvalue, confidence intervals, and mean serum urate levels were inputted in table_4 in an exported word document. 
+We reported findings in this format with slight adjustments in including overall mean serum urate values for Females and Males. 
